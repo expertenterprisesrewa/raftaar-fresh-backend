@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------- कोर टेबल्स (कोई कॉम्प्लेक्स रिलेशन नहीं) -------------------
+
+model User {
+  id        Int     @id @default(autoincrement())
+  phone     String  @unique
+  name      String?
+  email     String?
+  role      String  @default("customer") // customer, rider, admin, employee
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  price       Float
+  mrp         Float
+  category    String
+  brand       String?
+  images      String[]
+  storeId     Int
+  stock       Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Order {
+  id        Int      @id @default(autoincrement())
+  orderId   String   @unique
+  userId    Int
+  storeId   Int
+  address   String   // simple address text
+  total     Float
+  status    String   @default("pending")
+  riderId   Int?
+  createdAt DateTime @default(now())
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  orderId   Int
+  productId Int
+  quantity  Int
+  price     Float
+}
+
+model Rider {
+  id           Int     @id @default(autoincrement())
+  userId       Int     @unique
+  vehicleType  String
+  isAvailable  Boolean @default(true)
+  totalEarnings Float  @default(0)
+}
+
+model Employee {
+  id            Int     @id @default(autoincrement())
+  userId        Int     @unique
+  storeId       Int
+  designation   String
+  salaryType    String  // fixed, hourly, commission
+  baseSalary    Float
+  commissionRate Float?
+  isActive      Boolean @default(true)
+  createdAt     DateTime @default(now())
+}
+
+model Attendance {
+  id          Int      @id @default(autoincrement())
+  employeeId  Int
+  date        DateTime @default(now())
+  checkInTime DateTime
+  checkOutTime DateTime?
+  status      String   @default("present")
+}
+
+model SalarySlip {
+  id         Int      @id @default(autoincrement())
+  employeeId Int
+  month      DateTime
+  basePay    Float
+  commission Float
+  bonus      Float
+  deductions Float
+  netPay     Float
+  generatedAt DateTime @default(now())
+}
+
+model Cart {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  storeId   Int
+  createdAt DateTime @default(now())
+}
+
+model CartItem {
+  id        Int     @id @default(autoincrement())
+  cartId    Int
+  productId Int
+  quantity  Int
+  price     Float
+}
+
+model Payment {
+  id            Int      @id @default(autoincrement())
+  orderId       Int      @unique
+  amount        Float
+  method        String
+  status        String
+  transactionId String?
+  createdAt     DateTime @default(now())
+}
+
+model Coupon {
+  id           Int      @id @default(autoincrement())
+  code         String   @unique
+  discount     Float
+  discountType String
+  minOrder     Float
+  validTill    DateTime
+  usageLimit   Int
+  usedCount    Int      @default(0)
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  productId Int
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
